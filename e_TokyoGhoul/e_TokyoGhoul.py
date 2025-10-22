@@ -1,34 +1,27 @@
 
 from http.client import SWITCHING_PROTOCOLS
 import time
-import random as rd
 from multiprocessing import Process, Value
 import tkinter as tk
 import time
+import numpy as np
 
 #乱数
-li_normal = list(range(79980)) #/400 当たり200個
-li_st = list(range(76240)) #/800
+#li_normal = list(range(79980)) #/400 当たり200個
+#li_st = list(range(76240)) #/800
 
 #ずっと動かすメイン抽選
 def roulette_normal(NORMAL,FLG):
     if FLG.value == 0:
-        r = rd.randint(0,79979)
+        rng = np.random.default_rng()
         while True:
-            for i in li_normal[r:]:
-                NORMAL.value = i
-            for i in li_normal[:r]:
-                NORMAL.value = i
-
+            NORMAL.value = rng.integers(0,79979)
 
 def roulette_st(ST,FLG):
     if FLG.value == 1:
-        r = rd.randint(0,76239)
+        rng = np.random.default_rng()
         while True:
-            for i in li_st[r:]:
-                ST.value = i
-            for i in li_st[:r]:
-                ST.value = i
+            NORMAL.value = rng.integers(0,76239)
 
 
 #tkinterで状態や乱数、出玉などを表示する
