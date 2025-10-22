@@ -5,6 +5,7 @@ from multiprocessing import Process, Value
 import tkinter as tk
 import time
 import numpy as np
+from numpy.random import rand
 
 #乱数
 #li_normal = list(range(79980)) #/400 当たり200個
@@ -12,16 +13,20 @@ import numpy as np
 
 #ずっと動かすメイン抽選
 def roulette_normal(NORMAL,FLG):
-    if FLG.value == 0:
-        rng = np.random.default_rng()
-        while True:
+    rng = np.random.default_rng()
+    while True:
+        if FLG.value == 0:
             NORMAL.value = rng.integers(0,79979)
+        else:
+            time.sleep(0.001) #休憩
 
 def roulette_st(ST,FLG):
-    if FLG.value == 1:
-        rng = np.random.default_rng()
-        while True:
-            NORMAL.value = rng.integers(0,76239)
+    rng = np.random.default_rng()
+    while True:
+        if FLG.value == 1:
+            ST.value = rng.integers(0,76239)
+        else:
+            time.sleep(0.001) #休憩
 
 
 #tkinterで状態や乱数、出玉などを表示する
@@ -29,6 +34,7 @@ random = 1
 cnt = 0
 now = 0 #現在の差玉
 ren = 0 #連荘数
+tokuzu2 = 0 #保留数
 def output(NORMAL,ST,FLG):
     global random,cnt
     def key_event(e,NORMAL,ST,FLG):
@@ -49,15 +55,19 @@ def output(NORMAL,ST,FLG):
 
     #抽選機の乱数を表示
     def see_n():
-        label2["text"] = NORMAL.value
-        root.after(1,see_n)
+        if FLG.value == 0:
+            label2["text"] = NORMAL.value
+            root.after(1,see_n)
+        else:
+            label2["text"] = ST.value
+            root.after(1,see_n)
 
     def normal(): #通常
         global random, cnt, now, ren
-        if random % 400 == 0:
-            block = random // 400  # 整数のブロック番号
+        if random % 200 == 0:
+            block = random // 200  # 整数のブロック番号
 
-            if block == 0:
+            if block <= 1:
                 FLG.value = 1
                 now += 270
                 cnt = 0
@@ -65,19 +75,19 @@ def output(NORMAL,ST,FLG):
                 label3["text"] = "ST"
                 label5["text"] = "差玉：" + str(now)
                 label8["text"] = "連荘数：" + str(ren)
-            elif block < 100:
+            elif block < 200:
                 now += 270
                 cnt = 0
                 label3["text"] = "喰種CHARGE"
                 label5["text"] = "差玉：" + str(now)
                 label8["text"] = "連荘数：" + str(ren)
-            elif block < 150:
+            elif block < 300:
                 now += 1400
                 cnt = 0
                 label3["text"] = "通常"
                 label5["text"] = "差玉：" + str(now)
                 label8["text"] = "連荘数：" + str(ren)
-            elif block < 200:
+            elif block < 400:
                 FLG.value = 1
                 now += 1400
                 cnt = 0
@@ -91,33 +101,34 @@ def output(NORMAL,ST,FLG):
             label5["text"] = "差玉：" + str(now)
 
 
-    def rush():#ST ２回やる処理をどう描くか
-        global random,cnt,now,ren
-        if cnt <= 130:
+    def rush():#ST
+        global random,cnt,now,ren,tokuzu2
+        if tokuzu2 > 0:
+            now += 1390
+            tokuzu2 -= 1
+            label5["text"] = "差玉：" + str(now)
+            if random >= 2287:
+                if tokuzu2 == 0:
+                    ren += 1
+                    cnt = 0
+                    label8["text"] = "連荘数：" + str(ren)
+            else: #3%
+                if tokuzu2 == 0:
+                    tokuzu2 = 2
+        elif cnt <= 130:
             if random % 800 == 0:
-                now += 1390
-                cnt = 0
-                ren += 1
+                tokuzu2 = 2
                 label3["text"] = "当たり"
-                label5["text"] = "差玉：" + str(now)
-                label8["text"] = "連荘数：" + str(ren)
             else:
                 label3["text"] = "ハズレ"
-                label6["text"] = "残り:" + str(159-cnt)
-        else:
-            if random % 3 == 0:
-                flg = 3
-                cnt = 0
-                now -= 35 #電サポ減少込み
-                label3["text"] = "cタイム当選"
-                label5["text"] = "差玉：" + str(now)
-            else:
-                flg = 0
-                ren = 0
-                now -= 15
-                label3["text"] = "cタイム非当選"
-                label5["text"] = "差玉：" + str(now)
-                label8["text"] = "連荘数：" + str(ren)
+                label6["text"] = "残り:" + str(130-cnt)
+        elif cnt > 130:
+            ren = 0
+            now -= 15
+            FLG.value = 0
+            label3["text"] = "ST終了"
+            label5["text"] = "差玉：" + str(now)
+            label8["text"] = "連荘数：" + str(ren)
 
     root = tk.Tk()
     root.title("eTokyoGhoul ↓キーで抽選")
