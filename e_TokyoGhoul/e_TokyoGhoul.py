@@ -8,17 +8,17 @@ import numpy as np
 from numpy.random import rand
 
 #乱数
-#li_normal = list(range(79980)) #/400 当たり200個
-#li_st = list(range(76240)) #/800
+#li_normal = list(range(79999)) # 当たり400個 
+#li_st = list(range(76240)) # 当たり400個 
 
 #ずっと動かすメイン抽選
 def roulette_normal(NORMAL,FLG):
     rng = np.random.default_rng()
     while True:
         if FLG.value == 0:
-            NORMAL.value = rng.integers(0,79979)
+            NORMAL.value = rng.integers(0,79998)
         else:
-            time.sleep(0.001) #休憩
+            time.sleep(0.001) # 休憩
 
 def roulette_st(ST,FLG):
     rng = np.random.default_rng()
@@ -26,7 +26,7 @@ def roulette_st(ST,FLG):
         if FLG.value == 1:
             ST.value = rng.integers(0,76239)
         else:
-            time.sleep(0.001) #休憩
+            time.sleep(0.001) # 休憩
 
 
 #tkinterで状態や乱数、出玉などを表示する
@@ -64,37 +64,34 @@ def output(NORMAL,ST,FLG):
 
     def normal(): #通常
         global random, cnt, now, ren
-        if random % 200 == 0:
-            block = random // 200  # 整数のブロック番号
-
-            if block <= 1:
-                FLG.value = 1
-                now += 270
-                cnt = 0
-                ren += 1
-                label3["text"] = "ST"
-                label5["text"] = "差玉：" + str(now)
-                label8["text"] = "連荘数：" + str(ren)
-            elif block < 200:
-                now += 270
-                cnt = 0
-                label3["text"] = "喰種CHARGE"
-                label5["text"] = "差玉：" + str(now)
-                label8["text"] = "連荘数：" + str(ren)
-            elif block < 300:
-                now += 1400
-                cnt = 0
-                label3["text"] = "通常"
-                label5["text"] = "差玉：" + str(now)
-                label8["text"] = "連荘数：" + str(ren)
-            elif block < 400:
-                FLG.value = 1
-                now += 1400
-                cnt = 0
-                ren += 1
-                label3["text"] = "ST"
-                label5["text"] = "差玉：" + str(now)
-                label8["text"] = "連荘数：" + str(ren)
+        if random <= 1:
+            FLG.value = 1
+            now += 270
+            cnt = 0
+            ren += 1
+            label3["text"] = "ST"
+            label5["text"] = "差玉：" + str(now)
+            label8["text"] = "連荘数：" + str(ren)
+        elif random < 200:
+            now += 270
+            cnt = 0
+            label3["text"] = "喰種CHARGE"
+            label5["text"] = "差玉：" + str(now)
+            label8["text"] = "連荘数：" + str(ren)
+        elif random < 300:
+            now += 1400
+            cnt = 0
+            label3["text"] = "通常"
+            label5["text"] = "差玉：" + str(now)
+            label8["text"] = "連荘数：" + str(ren)
+        elif random < 400:
+            FLG.value = 1
+            now += 1400
+            cnt = 0
+            ren += 1
+            label3["text"] = "ST"
+            label5["text"] = "差玉：" + str(now)
+            label8["text"] = "連荘数：" + str(ren)
         else:
             now -= 15
             label3["text"] = "ハズレ"
@@ -115,19 +112,20 @@ def output(NORMAL,ST,FLG):
             else: #3%
                 if tokuzu2 == 0:
                     tokuzu2 = 2
-        elif cnt <= 130:
-            if random % 800 == 0:
+        elif cnt < 130:
+            if random < 800:
                 tokuzu2 = 2
                 label3["text"] = "当たり"
             else:
                 label3["text"] = "ハズレ"
                 label6["text"] = "残り:" + str(130-cnt)
-        elif cnt > 130:
+        else:
             ren = 0
             now -= 15
             FLG.value = 0
             label3["text"] = "ST終了"
             label5["text"] = "差玉：" + str(now)
+            label6["text"] = "残り:" + str(130-cnt)
             label8["text"] = "連荘数：" + str(ren)
 
     root = tk.Tk()
